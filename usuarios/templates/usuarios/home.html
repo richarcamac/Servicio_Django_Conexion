@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Inicio</title>
+</head>
+<body>
+    <h2>Bienvenido, {{ user.nombre }}</h2>
+    <p>Rol: {{ user.rol }}</p>
+    <p>Status: {{ user.status }}</p>
+    <p>Fecha de registro: {{ user.fecharegistro }}</p>
+    <p>Último ingreso: {{ user.fechaultimoingreso }}</p>
+    <a href="{% url 'logout' %}">Cerrar sesión</a>
+</body>
+</html>
+

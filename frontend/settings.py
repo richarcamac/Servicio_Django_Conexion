@@ -27,7 +27,7 @@ SECRET_KEY = 'django-insecure-v02#l*vz09z2er+2f^nri*$0jw^(uk+*26_5-0m-eeqt8n(ed*
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['asiri-carrito.onrender.com', 'localhost']
+ALLOWED_HOSTS = ['asiricarritos.onrender.com', 'localhost']
 
 # Application definition
 
@@ -135,5 +135,6 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
 
 

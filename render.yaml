@@ -1,0 +1,7 @@
+services:
+  - type: web
+    name: asiri-carrito
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn frontend.wsgi:application
+    autoDeploy: true

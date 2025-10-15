@@ -33,7 +33,14 @@ def registro_view(request):
 
 def login_view(request):
     if request.method == 'POST':
-        form = LoginForm(request.POST)
+        if request.content_type == 'application/json':
+            try:
+                data = json.loads(request.body)
+            except Exception as e:
+                return JsonResponse({'success': False, 'error': 'JSON inválido', 'detail': str(e)}, status=400)
+            form = LoginForm(data)
+        else:
+            form = LoginForm(request.POST)
         if form.is_valid():
             correo = form.cleaned_data['correo']
             password = form.cleaned_data['password']
@@ -42,12 +49,14 @@ def login_view(request):
                 login(request, usuario)
                 usuario.fechaultimoingreso = timezone.now()
                 usuario.save()
-                return redirect('home')
+                return JsonResponse({'success': True, 'message': 'Login exitoso.'}, status=200)
             else:
-                messages.error(request, 'Correo o contraseña incorrectos.')
+                return JsonResponse({'success': False, 'error': 'Correo o contraseña incorrectos.'}, status=401)
+        else:
+            return JsonResponse({'success': False, 'error': 'Datos inválidos', 'detail': form.errors}, status=400)
     else:
         form = LoginForm()
-    return render(request, 'usuarios/login.html', {'form': form})
+        return render(request, 'usuarios/login.html', {'form': form})
 
 def logout_view(request):
     logout(request)

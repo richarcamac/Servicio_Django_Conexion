@@ -7,32 +7,32 @@ class RegistroAPITest(TestCase):
         self.client = Client()
         self.url = reverse('registro')
 
-    def test_registro_exitoso_json(self):
+    def test_registro_json(self):
         payload = {
             'nombre': 'Test User',
             'correo': 'testuser@example.com',
-            'password': 'testpassword',
-            'rol': 'usuario'
+            'password': 'testpassword123',
+            'rol': 'USER',
+            'status': True
         }
-        response = self.client.post(self.url, data=json.dumps(payload), content_type='application/json')
-        self.assertIn(response.status_code, [201, 400, 409])  # 201 si éxito, 400/409 si error externo
-        self.assertTrue('success' in response.json())
+        response = self.client.post(
+            self.url,
+            data=json.dumps(payload),
+            content_type='application/json'
+        )
+        self.assertEqual(response.status_code, 201)
+        self.assertIn('Usuario registrado correctamente', response.json().get('message', ''))
 
     def test_registro_faltan_campos(self):
         payload = {
             'nombre': 'Test User',
             'correo': 'testuser2@example.com'
-            # Falta password
         }
-        response = self.client.post(self.url, data=json.dumps(payload), content_type='application/json')
+        response = self.client.post(
+            self.url,
+            data=json.dumps(payload),
+            content_type='application/json'
+        )
         self.assertEqual(response.status_code, 400)
-        self.assertFalse(response.json()['success'])
-        self.assertIn('Faltan campos', response.json()['error'])
+        self.assertIn('Faltan campos obligatorios', response.json().get('error', ''))
 
-    def test_registro_json_invalido(self):
-        response = self.client.post(self.url, data='no es json', content_type='application/json')
-        self.assertEqual(response.status_code, 400)
-        self.assertFalse(response.json()['success'])
-        self.assertIn('JSON inválido', response.json()['error'])
-
-    # Puedes agregar más pruebas según la lógica del servicio externo

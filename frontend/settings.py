@@ -86,6 +86,7 @@ DATABASES = {
         'PASSWORD': '123456789Asiri',
         'HOST': 'mysql-asiridata.alwaysdata.net',
         'PORT': '3306',
+        'CONN_MAX_AGE': 0,
     }
 }
 
@@ -140,4 +141,5 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CORS_ALLOW_ALL_ORIGINS = True  # Permitir peticiones externas (solo para pruebas)
+
 

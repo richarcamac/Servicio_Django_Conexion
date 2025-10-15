@@ -26,14 +26,18 @@ def registro_view(request):
                     'nombre': nombre,
                     'correo': correo,
                     'password': password1,
+                    'password1': password1,
+                    'password2': password2,
                     'rol': 'usuario'
                 }
                 try:
                     response = requests.post(url, data=data)
+                    print('Respuesta servicio externo:', response.text)  # Depuración
                     if response.status_code == 201:
                         messages.success(request, 'Usuario registrado correctamente.')
                         return redirect('login')
                     else:
+                        # Mostrar el error recibido del servicio externo
                         messages.error(request, f'Error al registrar: {response.text}')
                 except Exception as e:
                     messages.error(request, f'Error de conexión: {str(e)}')
@@ -65,4 +69,3 @@ def logout_view(request):
 
 def home_view(request):
     return render(request, 'usuarios/home.html')
-

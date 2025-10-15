@@ -4,14 +4,39 @@ from django.contrib import messages
 from django.utils import timezone
 from .forms import RegistroForm, LoginForm
 from .models import Usuario
+import requests
+from django.views.decorators.csrf import csrf_exempt
 
+@csrf_exempt
 def registro_view(request):
     if request.method == 'POST':
         form = RegistroForm(request.POST)
         if form.is_valid():
-            form.save()
-            messages.success(request, 'Usuario registrado correctamente.')
-            return redirect('login')
+            nombre = form.cleaned_data['nombre']
+            correo = form.cleaned_data['correo']
+            password1 = form.cleaned_data['password1']
+            password2 = form.cleaned_data['password2']
+            # Validar contraseñas
+            if password1 != password2:
+                messages.error(request, 'Las contraseñas no coinciden.')
+            else:
+                # Consumir servicio externo
+                url = 'https://asiricarritos.onrender.com/registro/'
+                data = {
+                    'nombre': nombre,
+                    'correo': correo,
+                    'contraseña': password1,
+                    'rol': 'usuario'
+                }
+                try:
+                    response = requests.post(url, data=data)
+                    if response.status_code == 201:
+                        messages.success(request, 'Usuario registrado correctamente.')
+                        return redirect('login')
+                    else:
+                        messages.error(request, f'Error al registrar: {response.text}')
+                except Exception as e:
+                    messages.error(request, f'Error de conexión: {str(e)}')
     else:
         form = RegistroForm()
     return render(request, 'usuarios/registro.html', {'form': form})

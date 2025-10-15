@@ -25,7 +25,7 @@ def registro_view(request):
                 data = {
                     'nombre': nombre,
                     'correo': correo,
-                    'contraseña': password1,
+                    'password': password1,
                     'rol': 'usuario'
                 }
                 try:
@@ -65,3 +65,4 @@ def logout_view(request):
 
 def home_view(request):
     return render(request, 'usuarios/home.html')
+

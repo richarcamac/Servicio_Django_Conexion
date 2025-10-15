@@ -3,10 +3,12 @@
 import os
 import sys
 
-
 def main():
     """Run administrative tasks."""
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'frontend.settings')
+    port = os.environ.get("PORT")
+    if port and "runserver" not in sys.argv:
+        sys.argv += ["runserver", f"0.0.0.0:{port}"]
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:
@@ -17,11 +19,7 @@ def main():
         ) from exc
     execute_from_command_line(sys.argv)
 
-
 if __name__ == '__main__':
-    port = os.environ.get("PORT")
-    if port:
-        sys.argv += ["runserver", f"0.0.0.0:{port}"]
-    from django.core.management import execute_from_command_line
-    execute_from_command_line(sys.argv)
+    main()
+
 

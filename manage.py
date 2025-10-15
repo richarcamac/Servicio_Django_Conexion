@@ -19,4 +19,9 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    port = os.environ.get("PORT")
+    if port:
+        sys.argv += ["runserver", f"0.0.0.0:{port}"]
+    from django.core.management import execute_from_command_line
+    execute_from_command_line(sys.argv)
+

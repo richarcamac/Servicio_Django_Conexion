@@ -16,7 +16,7 @@ def registro_view(request):
             try:
                 data = json.loads(request.body)
             except Exception as e:
-                return JsonResponse({'success': False, 'error': 'JSON inválido', 'detail': str(e)}, status=400)
+                return JsonResponse({'success': False, 'error': 'JSON inválido'}, status=400)
             form = RegistroForm(data)
         else:
             form = RegistroForm(request.POST)
@@ -25,9 +25,12 @@ def registro_view(request):
                 usuario = form.save()
                 return JsonResponse({'success': True, 'message': 'Usuario registrado correctamente.'}, status=201)
             except Exception as e:
-                return JsonResponse({'success': False, 'error': 'Error al guardar usuario', 'detail': str(e)}, status=500)
+                # Controlar error de correo duplicado
+                if 'Duplicate entry' in str(e) and 'correo' in str(e):
+                    return JsonResponse({'success': False, 'error': 'El correo electrónico ya está registrado.'}, status=409)
+                return JsonResponse({'success': False, 'error': 'No se pudo registrar el usuario.'}, status=500)
         else:
-            return JsonResponse({'success': False, 'error': 'Datos inválidos', 'detail': form.errors}, status=400)
+            return JsonResponse({'success': False, 'error': 'Datos inválidos'}, status=400)
     else:
         return JsonResponse({'success': False, 'error': 'Método no permitido'}, status=405)
 
@@ -38,7 +41,7 @@ def login_view(request):
             try:
                 data = json.loads(request.body)
             except Exception as e:
-                return JsonResponse({'success': False, 'error': 'JSON inválido', 'detail': str(e)}, status=400)
+                return JsonResponse({'success': False, 'error': 'JSON inválido'}, status=400)
             form = LoginForm(data)
         else:
             form = LoginForm(request.POST)
@@ -55,9 +58,9 @@ def login_view(request):
                 else:
                     return JsonResponse({'success': False, 'error': 'Correo o contraseña incorrectos.'}, status=401)
             except Exception as e:
-                return JsonResponse({'success': False, 'error': 'Error en login', 'detail': str(e)}, status=500)
+                return JsonResponse({'success': False, 'error': 'Error en login'}, status=500)
         else:
-            return JsonResponse({'success': False, 'error': 'Datos inválidos', 'detail': form.errors}, status=400)
+            return JsonResponse({'success': False, 'error': 'Datos inválidos'}, status=400)
     else:
         return JsonResponse({'success': False, 'error': 'Método no permitido'}, status=405)
 

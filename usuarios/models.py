@@ -33,6 +33,8 @@ class Usuario(AbstractBaseUser, PermissionsMixin):
     fechaultimoingreso = models.DateTimeField(null=True, blank=True)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
+    codigo_recuperacion = models.CharField(max_length=10, null=True, blank=True)
+    codigo_expiracion = models.DateTimeField(null=True, blank=True)
 
     objects = UsuarioManager()
 

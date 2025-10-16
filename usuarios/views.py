@@ -31,6 +31,7 @@ def registro_view(request):
     else:
         return JsonResponse({'success': False, 'error': 'Método no permitido'}, status=405)
 
+@csrf_exempt
 def login_view(request):
     if request.method == 'POST':
         if request.content_type == 'application/json':
@@ -42,21 +43,23 @@ def login_view(request):
         else:
             form = LoginForm(request.POST)
         if form.is_valid():
-            correo = form.cleaned_data['correo']
-            password = form.cleaned_data['password']
-            usuario = authenticate(request, correo=correo, password=password)
-            if usuario is not None:
-                login(request, usuario)
-                usuario.fechaultimoingreso = timezone.now()
-                usuario.save()
-                return JsonResponse({'success': True, 'message': 'Login exitoso.'}, status=200)
-            else:
-                return JsonResponse({'success': False, 'error': 'Correo o contraseña incorrectos.'}, status=401)
+            try:
+                correo = form.cleaned_data['correo']
+                password = form.cleaned_data['password']
+                usuario = authenticate(request, correo=correo, password=password)
+                if usuario is not None:
+                    login(request, usuario)
+                    usuario.fechaultimoingreso = timezone.now()
+                    usuario.save()
+                    return JsonResponse({'success': True, 'message': 'Login exitoso.'}, status=200)
+                else:
+                    return JsonResponse({'success': False, 'error': 'Correo o contraseña incorrectos.'}, status=401)
+            except Exception as e:
+                return JsonResponse({'success': False, 'error': 'Error en login', 'detail': str(e)}, status=500)
         else:
             return JsonResponse({'success': False, 'error': 'Datos inválidos', 'detail': form.errors}, status=400)
     else:
-        form = LoginForm()
-        return render(request, 'usuarios/login.html', {'form': form})
+        return JsonResponse({'success': False, 'error': 'Método no permitido'}, status=405)
 
 def logout_view(request):
     logout(request)

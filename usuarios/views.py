@@ -8,6 +8,10 @@ import requests
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 import json
+from django.core.mail import send_mail
+from django.utils.crypto import get_random_string
+from django.conf import settings
+from datetime import datetime, timedelta
 
 @csrf_exempt
 def registro_view(request):
@@ -70,3 +74,32 @@ def logout_view(request):
 
 def home_view(request):
     return render(request, 'usuarios/home.html')
+
+@csrf_exempt
+def recuperar_view(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            correo = data.get('correo')
+            if not correo:
+                return JsonResponse({'success': False, 'error': 'Correo requerido'}, status=400)
+            try:
+                usuario = Usuario.objects.get(correo=correo)
+            except Usuario.DoesNotExist:
+                return JsonResponse({'success': False, 'error': 'Correo no registrado'}, status=404)
+            codigo = get_random_string(length=6)
+            usuario.codigo_recuperacion = codigo
+            usuario.codigo_expiracion = datetime.now() + timedelta(minutes=10)
+            usuario.save()
+            send_mail(
+                'Recuperación de contraseña',
+                f'Tu código de recuperación es: {codigo}',
+                settings.DEFAULT_FROM_EMAIL,
+                [correo],
+                fail_silently=False,
+            )
+            return JsonResponse({'success': True, 'message': 'Código enviado al correo.'}, status=200)
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': 'Error al enviar código'}, status=500)
+    else:
+        return JsonResponse({'success': False, 'error': 'Método no permitido'}, status=405)

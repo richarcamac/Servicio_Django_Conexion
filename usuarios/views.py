@@ -89,7 +89,7 @@ def recuperar_view(request):
                 return JsonResponse({'success': False, 'error': 'Correo no registrado'}, status=404)
             codigo = get_random_string(length=6)
             usuario.codigo_recuperacion = codigo
-            usuario.codigo_expiracion = datetime.now() + timedelta(minutes=10)
+            usuario.codigo_expiracion = timezone.now() + timedelta(minutes=10)
             usuario.save()
             send_mail(
                 'Recuperación de contraseña',

@@ -91,15 +91,22 @@ def recuperar_view(request):
             usuario.codigo_recuperacion = codigo
             usuario.codigo_expiracion = timezone.now() + timedelta(minutes=10)
             usuario.save()
-            send_mail(
-                'Recuperación de contraseña',
-                f'Tu código de recuperación es: {codigo}',
-                settings.DEFAULT_FROM_EMAIL,
-                [correo],
-                fail_silently=False,
-            )
+            try:
+                send_mail(
+                    'Recuperación de contraseña',
+                    f'Tu código de recuperación es: {codigo}',
+                    settings.DEFAULT_FROM_EMAIL,
+                    [correo],
+                    fail_silently=False,
+                )
+            except Exception as e:
+                import traceback
+                print(traceback.format_exc())
+                return JsonResponse({'success': False, 'error': 'Error al enviar código', 'detail': str(e)}, status=500)
             return JsonResponse({'success': True, 'message': 'Código enviado al correo.'}, status=200)
         except Exception as e:
-            return JsonResponse({'success': False, 'error': 'Error al enviar código'}, status=500)
+            import traceback
+            print(traceback.format_exc())
+            return JsonResponse({'success': False, 'error': 'Error al procesar la solicitud', 'detail': str(e)}, status=500)
     else:
         return JsonResponse({'success': False, 'error': 'Método no permitido'}, status=405)

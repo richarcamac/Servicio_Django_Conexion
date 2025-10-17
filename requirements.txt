@@ -5,3 +5,4 @@ whitenoise
 django-cors-headers
 gunicorn
 requests
+sendgrid-django

@@ -1,2 +1,1 @@
-web: gunicorn frontend.wsgi --log-file -
-
+web: pip install --force-reinstall sendgrid-django && gunicorn frontend.wsgi --log-file -

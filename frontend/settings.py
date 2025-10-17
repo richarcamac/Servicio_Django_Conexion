@@ -143,11 +143,12 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 CORS_ALLOW_ALL_ORIGINS = True  # Permitir peticiones externas (solo para pruebas)
 
 # Configuración para el envío de correos
-EMAIL_BACKEND = "sendgrid_backend.SendgridBackend"
+EMAIL_BACKEND = "sendgrid_django.SendgridBackend"
 SENDGRID_API_KEY = "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"
 SENDGRID_SANDBOX_MODE_IN_DEBUG = False
 SENDGRID_ECHO_TO_STDOUT = True
 DEFAULT_FROM_EMAIL = "asiri.carrito@gmail.com"
+
 
 
 

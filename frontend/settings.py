@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'usuarios',  # Agregada la app usuarios
     'corsheaders',  # Permitir CORS
+    'sendgrid_django',
 ]
 
 MIDDLEWARE = [
@@ -150,6 +151,7 @@ SENDGRID_API_KEY = "SG.RaVTZG0vQ6alCJilGxoZbQ._zPVQCBAUHB5-uXJ0JKf4gBFkxIQU2AP8U
 SENDGRID_SANDBOX_MODE_IN_DEBUG = False
 SENDGRID_ECHO_TO_STDOUT = True
 DEFAULT_FROM_EMAIL = "asiri.carrito@gmail.com"
+
 
 
 

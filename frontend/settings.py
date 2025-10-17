@@ -13,8 +13,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 from pathlib import Path
 import os
 import dj_database_url
-import pkgutil
-print("sendgrid_django instalado:", pkgutil.find_loader("sendgrid_django") is not None)
+import sendgrid_django
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -151,6 +150,7 @@ SENDGRID_API_KEY = "SG.RaVTZG0vQ6alCJilGxoZbQ._zPVQCBAUHB5-uXJ0JKf4gBFkxIQU2AP8U
 SENDGRID_SANDBOX_MODE_IN_DEBUG = False
 SENDGRID_ECHO_TO_STDOUT = True
 DEFAULT_FROM_EMAIL = "asiri.carrito@gmail.com"
+
 
 
 

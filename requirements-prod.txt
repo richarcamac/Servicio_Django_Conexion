@@ -4,5 +4,5 @@ dj-database-url
 whitenoise
 django-cors-headers
 gunicorn
-sendgrid-django
+sendgrid-django==4.1.0
 requests

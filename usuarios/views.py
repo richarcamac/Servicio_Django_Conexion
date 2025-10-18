@@ -8,6 +8,7 @@ from .models import Usuario
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 import json
+import requests
 from django.core.mail import send_mail, get_connection
 from django.utils.crypto import get_random_string
 from django.conf import settings
@@ -177,5 +178,6 @@ def recuperar_view(request):
     except Exception as e:
         traceback.print_exc()
         return JsonResponse({'success': False, 'error': 'Error al enviar código', 'detail': str(e), 'backend': backend_used, 'sendgrid': sendgrid_result}, status=500)
+
 
 

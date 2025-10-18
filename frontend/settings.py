@@ -118,11 +118,25 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CORS_ALLOW_ALL_ORIGINS = True  # Permitir peticiones externas (solo para pruebas)
 # Email (SendGrid)
-EMAIL_BACKEND = "sendgrid_django.SendgridBackend"
-SENDGRID_API_KEY = os.environ.get("SENDGRID_API_KEY", "")
-SENDGRID_SANDBOX_MODE_IN_DEBUG = False
-SENDGRID_ECHO_TO_STDOUT = True
+# EMAIL_BACKEND = "sendgrid_django.SendgridBackend"
+# SENDGRID_API_KEY = os.environ.get("SENDGRID_API_KEY", "")
+# SENDGRID_SANDBOX_MODE_IN_DEBUG = False
+# SENDGRID_ECHO_TO_STDOUT = True
+# DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "asiri.carrito@example.com")
+
+SENDGRID_API_KEY = os.environ.get("SENDGRID_API_KEY", "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").strip()
 DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "asiri.carrito@example.com")
 
+# Configurar EMAIL_BACKEND de forma condicional:
+# - Si hay SENDGRID_API_KEY usar sendgrid_django backend
+# - Si no, usar backend de consola (evita errores en desarrollo y permite ver el email)
+if SENDGRID_API_KEY:
+    EMAIL_BACKEND = "sendgrid_django.SendgridBackend"
+    SENDGRID_SANDBOX_MODE_IN_DEBUG = False
+    SENDGRID_ECHO_TO_STDOUT = False
+else:
+    EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+    SENDGRID_SANDBOX_MODE_IN_DEBUG = False
+    SENDGRID_ECHO_TO_STDOUT = False
 
 

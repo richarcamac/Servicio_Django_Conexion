@@ -16,18 +16,11 @@ from datetime import timedelta
 from django.db import IntegrityError
 import traceback
 
-# Intentar importar la SDK oficial de SendGrid
-try:
-    from sendgrid import SendGridAPIClient
-except Exception:
-    SendGridAPIClient = None
-
 @csrf_exempt
 def registro_view(request):
     if request.method != 'POST':
         return JsonResponse({'success': False, 'error': 'Método no permitido'}, status=405)
 
-    # Obtener datos según content-type
     content_type = request.META.get('CONTENT_TYPE', '')
     if 'application/json' in content_type:
         try:
@@ -45,7 +38,6 @@ def registro_view(request):
         usuario = form.save()
         return JsonResponse({'success': True, 'message': 'Usuario registrado correctamente.'}, status=201)
     except IntegrityError as e:
-        # Manejar duplicado en correo u otros unique constraints
         if 'correo' in str(e).lower() or 'unique' in str(e).lower():
             return JsonResponse({'success': False, 'error': 'El correo electrónico ya está registrado.'}, status=409)
         traceback.print_exc()
@@ -128,8 +120,8 @@ def recuperar_view(request):
     backend_used = None
     sendgrid_result = None
 
-    # Envío directo a la API REST de SendGrid si hay API key
     api_key = getattr(settings, 'SENDGRID_API_KEY', '') or None
+
     if api_key:
         try:
             url = "https://api.sendgrid.com/v3/mail/send"
@@ -151,20 +143,24 @@ def recuperar_view(request):
             backend_used = "sendgrid_api"
             if resp.status_code in (200, 202):
                 return JsonResponse({'success': True, 'message': 'Código enviado al correo.', 'backend': backend_used, 'sendgrid': sendgrid_result}, status=200)
-            # si SendGrid respondió con error, continuamos al fallback y lo reportamos
+            if resp.status_code == 401:
+                # API Key inválida/expirada/revocada
+                sendgrid_result['error'] = 'SendGrid API key inválida o no autorizada (401). Verificar SENDGRID_API_KEY en entorno.'
+            # continuar a fallback para no bloquear el flujo
         except Exception as e:
             traceback.print_exc()
             sendgrid_result = {"error": str(e)}
             backend_used = "sendgrid_api_error"
 
-    # Fallback: usar django.core.mail (usa settings.EMAIL_BACKEND; si apunta a backend inexistente, usar console)
+    # Fallback: usar backend seguro (console) para evitar que la app falle si SendGrid no funciona
     try:
-        try:
-            conn = get_connection()  # usa settings.EMAIL_BACKEND
-            backend_used = backend_used or 'configured_email_backend'
-        except ModuleNotFoundError:
+        # Si intentamos SendGrid y falló, evitar reintentar el mismo backend; forzar consola para dev.
+        if api_key and backend_used and backend_used.startswith('sendgrid'):
             conn = get_connection(backend='django.core.mail.backends.console.EmailBackend')
             backend_used = backend_used or 'console_fallback'
+        else:
+            conn = get_connection()  # usa settings.EMAIL_BACKEND
+            backend_used = backend_used or 'configured_email_backend'
 
         send_mail(
             'Recuperación de contraseña',
@@ -178,6 +174,3 @@ def recuperar_view(request):
     except Exception as e:
         traceback.print_exc()
         return JsonResponse({'success': False, 'error': 'Error al enviar código', 'detail': str(e), 'backend': backend_used, 'sendgrid': sendgrid_result}, status=500)
-
-
-

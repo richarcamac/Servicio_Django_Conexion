@@ -1,4 +1,3 @@
-```python
 import os
 from pathlib import Path
 import dj_database_url
@@ -58,3 +57,4 @@ SENDGRID_API_KEY = os.environ.get("SENDGRID_API_KEY", "")
 SENDGRID_SANDBOX_MODE_IN_DEBUG = False
 SENDGRID_ECHO_TO_STDOUT = True
 DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "asiri.carrito@example.com")
+

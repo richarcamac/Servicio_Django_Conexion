@@ -124,7 +124,7 @@ CORS_ALLOW_ALL_ORIGINS = True  # Permitir peticiones externas (solo para pruebas
 # SENDGRID_ECHO_TO_STDOUT = True
 # DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "asiri.carrito@example.com")
 
-SENDGRID_API_KEY = os.environ.get("SENDGRID_API_KEY", "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").strip()
+SENDGRID_API_KEY = os.environ.get("SENDGRID_API_KEY", "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").strip()
 DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "asiri.carrito@example.com")
 
 # Configurar EMAIL_BACKEND de forma condicional:
@@ -138,6 +138,7 @@ else:
     EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
     SENDGRID_SANDBOX_MODE_IN_DEBUG = False
     SENDGRID_ECHO_TO_STDOUT = False
+
 
 
 

@@ -119,6 +119,7 @@ def recuperar_view(request):
 
     backend_used = None
     sendgrid_result = None
+    use_console_fallback = False
 
     api_key = getattr(settings, 'SENDGRID_API_KEY', '') or None
 
@@ -140,24 +141,26 @@ def recuperar_view(request):
             }
             resp = requests.post(url, json=payload, headers=headers, timeout=10)
             sendgrid_result = {"status_code": resp.status_code, "body": resp.text[:1000]}
-            backend_used = "sendgrid_api"
             if resp.status_code in (200, 202):
+                backend_used = "sendgrid_api"
                 return JsonResponse({'success': True, 'message': 'Código enviado al correo.', 'backend': backend_used, 'sendgrid': sendgrid_result}, status=200)
+            # Si SendGrid respondió con error, documentarlo y forzar fallback seguro
+            sendgrid_result['error'] = sendgrid_result.get('error') or f"SendGrid returned {resp.status_code}"
             if resp.status_code == 401:
-                # API Key inválida/expirada/revocada
                 sendgrid_result['error'] = 'SendGrid API key inválida o no autorizada (401). Verificar SENDGRID_API_KEY en entorno.'
-            # continuar a fallback para no bloquear el flujo
+            backend_used = "sendgrid_api_error"
+            use_console_fallback = True
         except Exception as e:
             traceback.print_exc()
             sendgrid_result = {"error": str(e)}
             backend_used = "sendgrid_api_error"
+            use_console_fallback = True
 
-    # Fallback: usar backend seguro (console) para evitar que la app falle si SendGrid no funciona
+    # Fallback: usar backend seguro (console) si SendGrid falló o usar el backend configurado
     try:
-        # Si intentamos SendGrid y falló, evitar reintentar el mismo backend; forzar consola para dev.
-        if api_key and backend_used and backend_used.startswith('sendgrid'):
+        if use_console_fallback:
             conn = get_connection(backend='django.core.mail.backends.console.EmailBackend')
-            backend_used = backend_used or 'console_fallback'
+            backend_used = 'console_fallback'
         else:
             conn = get_connection()  # usa settings.EMAIL_BACKEND
             backend_used = backend_used or 'configured_email_backend'

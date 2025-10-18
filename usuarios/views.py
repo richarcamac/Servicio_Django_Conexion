@@ -1,8 +1,7 @@
 # python
-# File: `PYTHON_publicar/frontend/usuarios/views.py`
+# File: `usuarios/views.py`
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
-from django.contrib import messages
 from django.utils import timezone
 from .forms import RegistroForm, LoginForm
 from .models import Usuario
@@ -19,10 +18,8 @@ import traceback
 # Intentar importar la SDK oficial de SendGrid
 try:
     from sendgrid import SendGridAPIClient
-    from sendgrid.helpers.mail import Mail
 except Exception:
     SendGridAPIClient = None
-    Mail = None
 
 @csrf_exempt
 def registro_view(request):
@@ -30,7 +27,8 @@ def registro_view(request):
         return JsonResponse({'success': False, 'error': 'Método no permitido'}, status=405)
 
     # Obtener datos según content-type
-    if request.content_type == 'application/json':
+    content_type = request.META.get('CONTENT_TYPE', '')
+    if 'application/json' in content_type:
         try:
             data = json.loads(request.body)
         except Exception:
@@ -60,7 +58,8 @@ def login_view(request):
     if request.method != 'POST':
         return JsonResponse({'success': False, 'error': 'Método no permitido'}, status=405)
 
-    if request.content_type == 'application/json':
+    content_type = request.META.get('CONTENT_TYPE', '')
+    if 'application/json' in content_type:
         try:
             data = json.loads(request.body)
         except Exception:
@@ -99,10 +98,15 @@ def recuperar_view(request):
     if request.method != 'POST':
         return JsonResponse({'success': False, 'error': 'Método no permitido'}, status=405)
 
-    try:
-        data = json.loads(request.body)
-    except Exception:
-        return JsonResponse({'success': False, 'error': 'JSON inválido'}, status=400)
+    content_type = request.META.get('CONTENT_TYPE', '')
+    if 'application/json' in content_type:
+        try:
+            data = json.loads(request.body)
+        except Exception:
+            return JsonResponse({'success': False, 'error': 'JSON inválido'}, status=400)
+    else:
+        # Si no es JSON, aceptar formulario POST clásico
+        data = request.POST
 
     correo = data.get('correo')
     if not correo:
@@ -122,20 +126,26 @@ def recuperar_view(request):
     usuario.save()
 
     # Intentar enviar con la SDK de SendGrid si está disponible y hay API key
-    if SendGridAPIClient and Mail and settings.SENDGRID_API_KEY:
+    if SendGridAPIClient and settings.SENDGRID_API_KEY:
         try:
-            message = Mail(
-                from_email=settings.DEFAULT_FROM_EMAIL,
-                to_emails=correo,
-                subject="Recuperación de contraseña",
-                plain_text_content=f"Tu código de recuperación es: {codigo}",
-            )
             sg = SendGridAPIClient(settings.SENDGRID_API_KEY)
-            sg.send(message)
+            request_body = {
+                "personalizations": [
+                    {
+                        "to": [{"email": correo}],
+                        "subject": "Recuperación de contraseña"
+                    }
+                ],
+                "from": {"email": settings.DEFAULT_FROM_EMAIL},
+                "content": [
+                    {"type": "text/plain", "value": f"Tu código de recuperación es: {codigo}"}
+                ]
+            }
+            sg.client.mail.send.post(request_body=request_body)
             return JsonResponse({'success': True, 'message': 'Código enviado al correo.'}, status=200)
         except Exception:
             traceback.print_exc()
-            return JsonResponse({'success': False, 'error': 'Error al enviar código vía SendGrid', 'detail': 'SDK error'}, status=500)
+            # Intentar fallback abajo
 
     # Fallback: usar django.core.mail con get_connection y proteger frente a backends inexistentes
     try:
@@ -144,6 +154,7 @@ def recuperar_view(request):
         except ModuleNotFoundError:
             # settings.EMAIL_BACKEND refiere a un paquete inexistente (p.ej. sendgrid_django)
             conn = get_connection(backend='django.core.mail.backends.console.EmailBackend')
+
         send_mail(
             'Recuperación de contraseña',
             f'Tu código de recuperación es: {codigo}',

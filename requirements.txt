@@ -5,4 +5,5 @@ whitenoise
 django-cors-headers
 gunicorn
 requests
+wheel
 sendgrid-django==4.1.0

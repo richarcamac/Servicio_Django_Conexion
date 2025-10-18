@@ -8,3 +8,4 @@ requests
 sendgrid-django==4.1.0
 wheel
 setuptools>=61.0.0
+sendgrid

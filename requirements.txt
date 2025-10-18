@@ -6,6 +6,6 @@ django-cors-headers
 gunicorn
 requests
 sendgrid-django==4.1.0
+sendgrid
 wheel
 setuptools>=61.0.0
-sendgrid

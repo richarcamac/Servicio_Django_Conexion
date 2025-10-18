@@ -13,7 +13,6 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 from pathlib import Path
 import os
 import dj_database_url
-import sendgrid_django
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -146,15 +145,7 @@ CORS_ALLOW_ALL_ORIGINS = True  # Permitir peticiones externas (solo para pruebas
 
 # Configuración para el envío de correos
 EMAIL_BACKEND = "sendgrid_django.SendgridBackend"
-SENDGRID_API_KEY = "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"
+SENDGRID_API_KEY = os.environ.get("SENDGRID_API_KEY", "")
 SENDGRID_SANDBOX_MODE_IN_DEBUG = False
 SENDGRID_ECHO_TO_STDOUT = True
-DEFAULT_FROM_EMAIL = "asiri.carrito@gmail.com"
-
-
-
-
-
-
-
-
+DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "asiri.carrito@example.com")

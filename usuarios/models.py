@@ -43,3 +43,21 @@ class Usuario(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return self.correo
+
+class Producto(models.Model):
+    """Modelo para productos que usarán el front Kotlin y la API."""
+    titulo = models.CharField(max_length=200)
+    descripcion = models.TextField(blank=True)
+    imagen = models.URLField(blank=True)  # URL de imagen (más simple que ImageField para un servicio API)
+    unidad = models.CharField(max_length=50, default='unidad')
+    precio = models.DecimalField(max_digits=10, decimal_places=2)
+    moneda = models.CharField(max_length=10, default='COP')
+    estado = models.BooleanField(default=True)
+    fecharegistro = models.DateTimeField(default=timezone.now)
+    cantidad = models.IntegerField(default=0)
+
+    class Meta:
+        ordering = ['-fecharegistro']
+
+    def __str__(self):
+        return self.titulo

@@ -2,18 +2,18 @@
 # File: `usuarios/views.py`
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
+from django.contrib import messages
 from django.utils import timezone
 from .forms import RegistroForm, LoginForm
-from .models import Usuario
+from .models import Usuario, Producto
 import requests
 from django.views.decorators.csrf import csrf_exempt
-from django.http import JsonResponse, HttpResponse
+from django.http import JsonResponse
 import json
 from django.core.mail import send_mail, get_connection
 from django.utils.crypto import get_random_string
 from django.conf import settings
 from datetime import datetime, timedelta
-from django.template import TemplateDoesNotExist
 from django.db import IntegrityError
 import traceback
 
@@ -62,7 +62,8 @@ def login_view(request):
                     login(request, usuario)
                     usuario.fechaultimoingreso = timezone.now()
                     usuario.save()
-                    return JsonResponse({'success': True, 'message': 'Login exitoso.'}, status=200)
+                    # Devolver también rol y datos mínimos para la app cliente
+                    return JsonResponse({'success': True, 'message': 'Login exitoso.', 'rol': usuario.rol, 'nombre': usuario.nombre, 'id': usuario.id}, status=200)
                 else:
                     return JsonResponse({'success': False, 'error': 'Correo o contraseña incorrectos.'}, status=401)
             except Exception as e:
@@ -205,3 +206,92 @@ def resetear_password_view(request):
     except Exception as e:
         traceback.print_exc()
         return JsonResponse({'success': False, 'error': 'Error al actualizar la contraseña'}, status=500)
+
+@csrf_exempt
+def productos_list(request):
+    """Devuelve lista de productos en JSON. También acepta GET para la UI de Kotlin."""
+    if request.method != 'GET':
+        return JsonResponse({'success': False, 'error': 'Método no permitido'}, status=405)
+    productos = Producto.objects.filter(estado=True)
+    data = []
+    for p in productos:
+        data.append({
+            'id': p.id,
+            'titulo': p.titulo,
+            'descripcion': p.descripcion,
+            'imagen': p.imagen,
+            'unidad': p.unidad,
+            'precio': str(p.precio),
+            'moneda': p.moneda,
+            'cantidad': p.cantidad,
+            'fecharegistro': p.fecharegistro.isoformat(),
+        })
+    return JsonResponse({'success': True, 'productos': data}, status=200)
+
+@csrf_exempt
+def producto_detail(request, id):
+    if request.method != 'GET':
+        return JsonResponse({'success': False, 'error': 'Método no permitido'}, status=405)
+    try:
+        p = Producto.objects.get(id=id)
+    except Producto.DoesNotExist:
+        return JsonResponse({'success': False, 'error': 'Producto no encontrado'}, status=404)
+    data = {
+        'id': p.id,
+        'titulo': p.titulo,
+        'descripcion': p.descripcion,
+        'imagen': p.imagen,
+        'unidad': p.unidad,
+        'precio': str(p.precio),
+        'moneda': p.moneda,
+        'cantidad': p.cantidad,
+        'fecharegistro': p.fecharegistro.isoformat(),
+    }
+    return JsonResponse({'success': True, 'producto': data}, status=200)
+
+@csrf_exempt
+def productos_sample(request):
+    """Crear productos de ejemplo si la tabla está vacía (uso de prueba)."""
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'Método no permitido'}, status=405)
+    try:
+        if Producto.objects.count() == 0:
+            ejemplos = [
+                {
+                    'titulo': 'Manzana Roja',
+                    'descripcion': 'Manzana fresca y jugosa, origen local.',
+                    'imagen': 'https://via.placeholder.com/200?text=Manzana',
+                    'unidad': 'kg',
+                    'precio': '3.50',
+                    'moneda': 'USD',
+                    'cantidad': 100,
+                },
+                {
+                    'titulo': 'Pan Artesanal',
+                    'descripcion': 'Pan hecho a mano, ideal para desayuno.',
+                    'imagen': 'https://via.placeholder.com/200?text=Pan',
+                    'unidad': 'pieza',
+                    'precio': '1.20',
+                    'moneda': 'USD',
+                    'cantidad': 50,
+                },
+                {
+                    'titulo': 'Café Molido',
+                    'descripcion': 'Café premium, tostado medio.',
+                    'imagen': 'https://via.placeholder.com/200?text=Cafe',
+                    'unidad': 'bag',
+                    'precio': '8.75',
+                    'moneda': 'USD',
+                    'cantidad': 30,
+                },
+            ]
+            for e in ejemplos:
+                Producto.objects.create(
+                    titulo=e['titulo'], descripcion=e['descripcion'], imagen=e['imagen'], unidad=e['unidad'], precio=e['precio'], moneda=e['moneda'], cantidad=e['cantidad']
+                )
+            return JsonResponse({'success': True, 'message': 'Productos de ejemplo creados.'}, status=201)
+        else:
+            return JsonResponse({'success': False, 'error': 'Ya existen productos.'}, status=400)
+    except Exception as e:
+        traceback.print_exc()
+        return JsonResponse({'success': False, 'error': 'Error al crear ejemplos', 'detail': str(e)}, status=500)

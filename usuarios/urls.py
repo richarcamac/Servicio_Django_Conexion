@@ -9,7 +9,13 @@ urlpatterns = [
     path('recuperar/', views.recuperar_view, name='recuperar'),  # Enviar código
     path('recuperar/verify/', views.verificar_codigo_view, name='recuperar_verify'),  # Verificar código
     path('recuperar/reset/', views.resetear_password_view, name='recuperar_reset'),  # Resetear contraseña
+
+    # Productos
+    path('productos/', views.productos_list, name='productos_list'),
+    path('productos/sample/', views.productos_sample, name='productos_sample'),
+    path('productos/<int:id>/', views.producto_detail, name='producto_detail'),
 ]
+
 
 
 

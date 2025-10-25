@@ -313,3 +313,9 @@ class RegistrarProductoAPIView(APIView):
             serializer.save()
             return Response({'success': True, 'producto': serializer.data}, status=status.HTTP_201_CREATED)
         return Response({'success': False, 'errors': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+class ListarProductosAPIView(APIView):
+    def get(self, request):
+        productos = Producto.objects.all()
+        serializer = ProductoSerializer(productos, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)

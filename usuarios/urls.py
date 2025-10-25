@@ -1,5 +1,7 @@
 from django.urls import path
 from . import views
+from rest_framework.routers import DefaultRouter
+from .views import ProductoViewSet, RegistrarProductoAPIView
 
 urlpatterns = [
     path('registro/', views.registro_view, name='registro'),
@@ -16,6 +18,7 @@ urlpatterns = [
     # path('productos/<int:id>/', views.producto_detail, name='producto_detail'),
     path('api/registrar_producto/', RegistrarProductoAPIView.as_view(), name='registrar_producto'),
 ]
+
 
 
 

@@ -16,6 +16,8 @@ from django.conf import settings
 from datetime import datetime, timedelta
 from django.db import IntegrityError
 import traceback
+from rest_framework import viewsets, permissions
+from .serializers import ProductoSerializer
 
 @csrf_exempt
 def registro_view(request):
@@ -295,3 +297,8 @@ def productos_sample(request):
     except Exception as e:
         traceback.print_exc()
         return JsonResponse({'success': False, 'error': 'Error al crear ejemplos', 'detail': str(e)}, status=500)
+
+class ProductoViewSet(viewsets.ModelViewSet):
+    queryset = Producto.objects.all().order_by('-fecharegistro')
+    serializer_class = ProductoSerializer
+    permission_classes = [permissions.AllowAny]

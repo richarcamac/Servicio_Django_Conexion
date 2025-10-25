@@ -17,6 +17,9 @@ from datetime import datetime, timedelta
 from django.db import IntegrityError
 import traceback
 from rest_framework import viewsets, permissions
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
 from .serializers import ProductoSerializer
 
 @csrf_exempt
@@ -302,3 +305,11 @@ class ProductoViewSet(viewsets.ModelViewSet):
     queryset = Producto.objects.all().order_by('-fecharegistro')
     serializer_class = ProductoSerializer
     permission_classes = [permissions.AllowAny]
+
+class RegistrarProductoAPIView(APIView):
+    def post(self, request):
+        serializer = ProductoSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({'success': True, 'producto': serializer.data}, status=status.HTTP_201_CREATED)
+        return Response({'success': False, 'errors': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)

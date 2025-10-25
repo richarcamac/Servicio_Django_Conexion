@@ -20,6 +20,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "usuarios",
     "corsheaders",
+    "rest_framework",
 ]
 
 MIDDLEWARE = [
@@ -138,6 +139,7 @@ else:
     EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
     SENDGRID_SANDBOX_MODE_IN_DEBUG = False
     SENDGRID_ECHO_TO_STDOUT = False
+
 
 
 

@@ -18,13 +18,5 @@ urlpatterns = [
     # path('productos/<int:id>/', views.producto_detail, name='producto_detail'),
     path('api/registrar_producto/', RegistrarProductoAPIView.as_view(), name='registrar_producto'),
     path('api/listar_productos/', ListarProductosAPIView.as_view(), name='listar_productos'),
+    path('api/', include(router.urls)),  # <-- Agrega el router bajo /api/
 ]
-
-
-
-
-
-
-
-
-

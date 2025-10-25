@@ -3,6 +3,9 @@ from . import views
 from rest_framework.routers import DefaultRouter
 from .views import ProductoViewSet, RegistrarProductoAPIView, ListarProductosAPIView
 
+router = DefaultRouter()
+router.register(r'productos', ProductoViewSet, basename='producto')
+
 urlpatterns = [
     path('registro/', views.registro_view, name='registro'),
     path('login/', views.login_view, name='login'),
@@ -20,4 +23,5 @@ urlpatterns = [
     path('api/listar_productos/', ListarProductosAPIView.as_view(), name='listar_productos'),
     path('api/', include(router.urls)),  # <-- Agrega el router bajo /api/
 ]
+
 

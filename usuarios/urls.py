@@ -14,7 +14,9 @@ urlpatterns = [
     # path('productos/', views.productos_list, name='productos_list'),
     path('productos/sample/', views.productos_sample, name='productos_sample'),
     # path('productos/<int:id>/', views.producto_detail, name='producto_detail'),
+    path('api/registrar_producto/', RegistrarProductoAPIView.as_view(), name='registrar_producto'),
 ]
+
 
 
 

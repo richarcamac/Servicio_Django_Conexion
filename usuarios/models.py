@@ -48,7 +48,7 @@ class Producto(models.Model):
     """Modelo para productos que usarán el front Kotlin y la API."""
     titulo = models.CharField(max_length=200)
     descripcion = models.TextField(blank=True)
-    imagen = models.URLField(blank=True)  # URL de imagen (más simple que ImageField para un servicio API)
+    imagen = models.ImageField(upload_to='productos/', blank=True, null=True) 
     unidad = models.CharField(max_length=50, default='unidad')
     precio = models.DecimalField(max_digits=10, decimal_places=2)
     moneda = models.CharField(max_length=10, default='COP')
@@ -61,3 +61,4 @@ class Producto(models.Model):
 
     def __str__(self):
         return self.titulo
+

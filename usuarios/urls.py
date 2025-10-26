@@ -16,13 +16,14 @@ urlpatterns = [
     path('recuperar/reset/', views.resetear_password_view, name='recuperar_reset'),  # Resetear contraseña
 
     # Productos
-    # path('productos/', views.productos_list, name='productos_list'),
+    path('productos/', views.productos_list, name='productos_list'),
     path('productos/sample/', views.productos_sample, name='productos_sample'),
     # path('productos/<int:id>/', views.producto_detail, name='producto_detail'),
     path('api/registrar_producto/', RegistrarProductoAPIView.as_view(), name='registrar_producto'),
     path('api/listar_productos/', ListarProductosAPIView.as_view(), name='listar_productos'),
     path('api/', include(router.urls)),  # <-- Agrega el router bajo /api/
 ]
+
 
 
 

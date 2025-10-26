@@ -218,9 +218,16 @@ def resetear_password_view(request):
 @csrf_exempt
 @require_GET
 def productos_list(request):
-    productos = Producto.objects.all()
+    productos = Producto.objects.filter(estado=True)
     serializer = ProductoSerializer(productos, many=True)
-    return JsonResponse(serializer.data, safe=False)
+    data = serializer.data
+    # Asegurar prefijo base64 en imagen
+    for producto in data:
+        imagen = producto.get('imagen', '')
+        if imagen and not (imagen.startswith('data:image/png;base64,') or imagen.startswith('data:image/jpeg;base64,') or imagen.startswith('data:image/jpg;base64,')):
+            # Por defecto, asumimos jpeg si no hay prefijo
+            producto['imagen'] = f"data:image/jpeg;base64,{imagen}"
+    return JsonResponse(data, safe=False)
 
 @csrf_exempt
 def producto_detail(request, id):
@@ -319,5 +326,6 @@ class ListarProductosAPIView(APIView):
         productos = Producto.objects.all()
         serializer = ProductoSerializer(productos, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 

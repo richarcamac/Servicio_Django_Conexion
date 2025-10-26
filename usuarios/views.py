@@ -23,6 +23,7 @@ from rest_framework import status
 from .serializers import ProductoSerializer
 from rest_framework.parsers import MultiPartParser, FormParser
 import os
+from django.views.decorators.http import require_GET
 
 @csrf_exempt
 def registro_view(request):
@@ -215,25 +216,11 @@ def resetear_password_view(request):
         return JsonResponse({'success': False, 'error': 'Error al actualizar la contraseña'}, status=500)
 
 @csrf_exempt
+@require_GET
 def productos_list(request):
-    """Devuelve lista de productos en JSON. También acepta GET para la UI de Kotlin."""
-    if request.method != 'GET':
-        return JsonResponse({'success': False, 'error': 'Método no permitido'}, status=405)
-    productos = Producto.objects.filter(estado=True)
-    data = []
-    for p in productos:
-        data.append({
-            'id': p.id,
-            'titulo': p.titulo,
-            'descripcion': p.descripcion,
-            'imagen': p.imagen,
-            'unidad': p.unidad,
-            'precio': str(p.precio),
-            'moneda': p.moneda,
-            'cantidad': p.cantidad,
-            'fecharegistro': p.fecharegistro.isoformat(),
-        })
-    return JsonResponse({'success': True, 'productos': data}, status=200)
+    productos = Producto.objects.all()
+    serializer = ProductoSerializer(productos, many=True)
+    return JsonResponse(serializer.data, safe=False)
 
 @csrf_exempt
 def producto_detail(request, id):
@@ -332,4 +319,5 @@ class ListarProductosAPIView(APIView):
         productos = Producto.objects.all()
         serializer = ProductoSerializer(productos, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
 

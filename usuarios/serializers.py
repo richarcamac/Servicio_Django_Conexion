@@ -2,7 +2,7 @@ from rest_framework import serializers
 from .models import Producto
 
 class ProductoSerializer(serializers.ModelSerializer):
-    imagen = serializers.ImageField(required=False, allow_null=True)
+    imagen = serializers.CharField(required=False, allow_blank=True, allow_null=True)
 
     class Meta:
         model = Producto
@@ -13,7 +13,11 @@ class ProductoSerializer(serializers.ModelSerializer):
         request = self.context.get('request')
         imagen_field = instance.imagen
         if imagen_field:
-            url = imagen_field.url if hasattr(imagen_field, 'url') else str(imagen_field)
+            # Si es un path, construye la URL absoluta
+            if hasattr(imagen_field, 'url'):
+                url = imagen_field.url
+            else:
+                url = str(imagen_field)
             if request is not None:
                 representation['imagen'] = request.build_absolute_uri(url)
             else:

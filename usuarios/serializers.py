@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Producto
+from .models import Producto, MaestroPedido, DetallePedido
 import base64
 import re
 
@@ -27,3 +27,21 @@ class ProductoSerializer(serializers.ModelSerializer):
         except Exception:
             raise serializers.ValidationError("La imagen no es una cadena base64 válida.")
         return value
+
+class DetallePedidoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DetallePedido
+        fields = ['producto', 'cantidad', 'precio']
+
+class MaestroPedidoSerializer(serializers.ModelSerializer):
+    detalles = DetallePedidoSerializer(many=True)
+    class Meta:
+        model = MaestroPedido
+        fields = ['id', 'fecha_registro', 'codigo_cliente', 'nombre_cliente', 'total', 'numero_celular', 'detalles']
+
+    def create(self, validated_data):
+        detalles_data = validated_data.pop('detalles')
+        maestro = MaestroPedido.objects.create(**validated_data)
+        for detalle_data in detalles_data:
+            DetallePedido.objects.create(maestro=maestro, **detalle_data)
+        return maestro

@@ -1,5 +1,7 @@
 from rest_framework import serializers
 from .models import Producto
+import base64
+import re
 
 class ProductoSerializer(serializers.ModelSerializer):
     imagen = serializers.CharField(required=False, allow_blank=True, allow_null=True)

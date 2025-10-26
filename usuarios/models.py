@@ -68,6 +68,7 @@ class MaestroPedido(models.Model):
     nombre_cliente = models.CharField(max_length=100)
     total = models.DecimalField(max_digits=10, decimal_places=2)
     numero_celular = models.CharField(max_length=15)
+    estado = models.CharField(max_length=20, default='Solicitud')  # Nuevo campo
 
 class DetallePedido(models.Model):
     maestro = models.ForeignKey(MaestroPedido, on_delete=models.CASCADE, related_name='detalles')

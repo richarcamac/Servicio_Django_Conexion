@@ -20,10 +20,11 @@ from rest_framework import viewsets, permissions
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from .serializers import ProductoSerializer
+from .serializers import ProductoSerializer, MaestroPedidoSerializer
 from rest_framework.parsers import MultiPartParser, FormParser
 import os
 from django.views.decorators.http import require_GET
+import re
 
 @csrf_exempt
 def registro_view(request):
@@ -327,5 +328,15 @@ class ListarProductosAPIView(APIView):
         serializer = ProductoSerializer(productos, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-
-
+class RegistrarPedidoAPIView(APIView):
+    def post(self, request):
+        data = request.data
+        numero_celular = data.get('numero_celular', '')
+        # Validar número de celular peruano: 9 dígitos, empieza con 9
+        if not re.fullmatch(r'9\d{8}', numero_celular):
+            return Response({'success': False, 'error': 'Número de celular inválido. Debe ser un número peruano válido.'}, status=status.HTTP_400_BAD_REQUEST)
+        serializer = MaestroPedidoSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({'success': True, 'message': 'Pedido registrado correctamente.'}, status=status.HTTP_201_CREATED)
+        return Response({'success': False, 'errors': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)

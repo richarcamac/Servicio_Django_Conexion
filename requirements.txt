@@ -10,3 +10,4 @@ sendgrid
 wheel
 setuptools>=61.0.0
 djangorestframework
+Pillow

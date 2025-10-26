@@ -37,7 +37,7 @@ class MaestroPedidoSerializer(serializers.ModelSerializer):
     detalles = DetallePedidoSerializer(many=True)
     class Meta:
         model = MaestroPedido
-        fields = ['id', 'fecha_registro', 'codigo_cliente', 'nombre_cliente', 'total', 'numero_celular', 'detalles']
+        fields = ['id', 'fecha_registro', 'codigo_cliente', 'nombre_cliente', 'total', 'numero_celular', 'estado', 'detalles']
 
     def create(self, validated_data):
         detalles_data = validated_data.pop('detalles')

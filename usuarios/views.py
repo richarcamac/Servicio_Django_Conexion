@@ -25,6 +25,7 @@ from rest_framework.parsers import MultiPartParser, FormParser
 import os
 from django.views.decorators.http import require_GET
 import re
+from rest_framework.decorators import action
 
 @csrf_exempt
 def registro_view(request):
@@ -340,3 +341,25 @@ class RegistrarPedidoAPIView(APIView):
             serializer.save()
             return Response({'success': True, 'message': 'Pedido registrado correctamente.'}, status=status.HTTP_201_CREATED)
         return Response({'success': False, 'errors': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+class ListarPedidosAPIView(APIView):
+    def get(self, request):
+        from .models import MaestroPedido
+        from .serializers import MaestroPedidoSerializer
+        pedidos = MaestroPedido.objects.all().order_by('-fecha_registro')
+        serializer = MaestroPedidoSerializer(pedidos, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+class CambiarEstadoPedidoAPIView(APIView):
+    def post(self, request, pk):
+        from .models import MaestroPedido
+        nuevo_estado = request.data.get('estado')
+        if nuevo_estado not in ['Solicitud', 'Atendido', 'Rechazado']:
+            return Response({'success': False, 'error': 'Estado inválido'}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            pedido = MaestroPedido.objects.get(pk=pk)
+            pedido.estado = nuevo_estado
+            pedido.save()
+            return Response({'success': True, 'message': 'Estado actualizado correctamente.'})
+        except MaestroPedido.DoesNotExist:
+            return Response({'success': False, 'error': 'Pedido no encontrado'}, status=status.HTTP_404_NOT_FOUND)

@@ -1,7 +1,7 @@
 from django.urls import path, include
 from . import views
 from rest_framework.routers import DefaultRouter
-from .views import ProductoViewSet, RegistrarProductoAPIView, ListarProductosAPIView, RegistrarPedidoAPIView
+from .views import ProductoViewSet, RegistrarProductoAPIView, ListarProductosAPIView, RegistrarPedidoAPIView, ListarPedidosAPIView, CambiarEstadoPedidoAPIView
 
 router = DefaultRouter()
 router.register(r'productos', ProductoViewSet, basename='producto')
@@ -22,8 +22,11 @@ urlpatterns = [
     path('api/registrar_producto/', RegistrarProductoAPIView.as_view(), name='registrar_producto'),
     path('api/listar_productos/', ListarProductosAPIView.as_view(), name='listar_productos'),
     path('api/registrar_pedido/', RegistrarPedidoAPIView.as_view(), name='registrar_pedido'),
+    path('api/listar_pedidos/', ListarPedidosAPIView.as_view(), name='listar_pedidos'),
+    path('api/cambiar_estado_pedido/<int:pk>/', CambiarEstadoPedidoAPIView.as_view(), name='cambiar_estado_pedido'),
     path('api/', include(router.urls)),  # <-- Agrega el router bajo /api/
 ]
+
 
 
 

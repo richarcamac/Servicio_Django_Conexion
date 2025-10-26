@@ -62,4 +62,15 @@ class Producto(models.Model):
     def __str__(self):
         return self.titulo
 
+class MaestroPedido(models.Model):
+    fecha_registro = models.DateTimeField(auto_now_add=True)
+    codigo_cliente = models.CharField(max_length=50)
+    nombre_cliente = models.CharField(max_length=100)
+    total = models.DecimalField(max_digits=10, decimal_places=2)
+    numero_celular = models.CharField(max_length=15)
 
+class DetallePedido(models.Model):
+    maestro = models.ForeignKey(MaestroPedido, on_delete=models.CASCADE, related_name='detalles')
+    producto = models.ForeignKey(Producto, on_delete=models.CASCADE)
+    cantidad = models.IntegerField()
+    precio = models.DecimalField(max_digits=10, decimal_places=2)

@@ -23,6 +23,9 @@ INSTALLED_APPS = [
     "rest_framework",
 ]
 
+# Configuración para Amazon S3 (django-storages)
+INSTALLED_APPS += ["storages"]
+
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
@@ -139,6 +142,7 @@ else:
     EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
     SENDGRID_SANDBOX_MODE_IN_DEBUG = False
     SENDGRID_ECHO_TO_STDOUT = False
+
 
 
 

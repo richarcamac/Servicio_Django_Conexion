@@ -21,6 +21,8 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from .serializers import ProductoSerializer
+from rest_framework.parsers import MultiPartParser, FormParser
+import os
 
 @csrf_exempt
 def registro_view(request):
@@ -319,3 +321,21 @@ class ListarProductosAPIView(APIView):
         productos = Producto.objects.all()
         serializer = ProductoSerializer(productos, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+class UploadImagenAPIView(APIView):
+    parser_classes = (MultiPartParser, FormParser)
+
+    def post(self, request, format=None):
+        file_obj = request.FILES.get('imagen')
+        if not file_obj:
+            return Response({'error': 'No se envió archivo'}, status=400)
+        # Guardar archivo en /media/productos/
+        folder = os.path.join(settings.MEDIA_ROOT, 'productos')
+        os.makedirs(folder, exist_ok=True)
+        file_path = os.path.join(folder, file_obj.name)
+        with open(file_path, 'wb+') as destination:
+            for chunk in file_obj.chunks():
+                destination.write(chunk)
+        url = settings.MEDIA_URL + 'productos/' + file_obj.name
+        full_url = request.build_absolute_uri(url)
+        return Response({'url': full_url})

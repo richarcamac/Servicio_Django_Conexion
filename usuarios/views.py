@@ -352,14 +352,36 @@ class ListarPedidosAPIView(APIView):
 
 class CambiarEstadoPedidoAPIView(APIView):
     def post(self, request, pk):
-        from .models import MaestroPedido
+        from .models import MaestroPedido, DetallePedido, Producto
         nuevo_estado = request.data.get('estado')
         if nuevo_estado not in ['Solicitud', 'Atendido', 'Rechazado']:
             return Response({'success': False, 'error': 'Estado inválido'}, status=status.HTTP_400_BAD_REQUEST)
         try:
             pedido = MaestroPedido.objects.get(pk=pk)
-            pedido.estado = nuevo_estado
-            pedido.save()
-            return Response({'success': True, 'message': 'Estado actualizado correctamente.'})
+            if nuevo_estado == 'Atendido':
+                detalles = DetallePedido.objects.filter(maestro=pedido)
+                errores = []
+                for det in detalles:
+                    producto = det.producto
+                    if det.cantidad > producto.cantidad:
+                        errores.append(f"No hay stock suficiente para el producto '{producto.titulo}'. Solicitado: {det.cantidad}, en stock: {producto.cantidad}")
+                if errores:
+                    return Response({'success': False, 'message': ' '.join(errores)}, status=status.HTTP_400_BAD_REQUEST)
+                # Descontar stock
+                for det in detalles:
+                    producto = det.producto
+                    producto.cantidad -= det.cantidad
+                    producto.save()
+                pedido.estado = 'Atendido'
+                pedido.save()
+                return Response({'success': True, 'message': 'Pedido atendido y stock actualizado.'})
+            elif nuevo_estado == 'Rechazado':
+                pedido.estado = 'Rechazado'
+                pedido.save()
+                return Response({'success': True, 'message': 'Pedido rechazado correctamente.'})
+            else:
+                pedido.estado = nuevo_estado
+                pedido.save()
+                return Response({'success': True, 'message': 'Estado actualizado correctamente.'})
         except MaestroPedido.DoesNotExist:
             return Response({'success': False, 'error': 'Pedido no encontrado'}, status=status.HTTP_404_NOT_FOUND)

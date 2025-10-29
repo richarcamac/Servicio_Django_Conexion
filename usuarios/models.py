@@ -75,3 +75,16 @@ class DetallePedido(models.Model):
     producto = models.ForeignKey(Producto, on_delete=models.CASCADE)
     cantidad = models.IntegerField()
     precio = models.DecimalField(max_digits=10, decimal_places=2)
+
+
+class MaestroCompra(models.Model):
+    fecha_registro = models.DateTimeField(auto_now_add=True)
+    proveedor = models.CharField(max_length=100, blank=True, null=True)
+    total = models.DecimalField(max_digits=10, decimal_places=2)
+    estado = models.CharField(max_length=20, default='Registrado')
+
+class DetalleCompra(models.Model):
+    maestro = models.ForeignKey(MaestroCompra, on_delete=models.CASCADE, related_name='detalles')
+    producto = models.ForeignKey(Producto, on_delete=models.CASCADE)
+    cantidad = models.IntegerField()
+    precio_costo = models.DecimalField(max_digits=10, decimal_places=2)

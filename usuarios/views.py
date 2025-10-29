@@ -20,7 +20,7 @@ from rest_framework import viewsets, permissions
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from .serializers import ProductoSerializer, MaestroPedidoSerializer
+from .serializers import ProductoSerializer, MaestroPedidoSerializer, MaestroCompraSerializer
 from rest_framework.parsers import MultiPartParser, FormParser
 import os
 from django.views.decorators.http import require_GET
@@ -385,3 +385,33 @@ class CambiarEstadoPedidoAPIView(APIView):
                 return Response({'success': True, 'message': 'Estado actualizado correctamente.'})
         except MaestroPedido.DoesNotExist:
             return Response({'success': False, 'error': 'Pedido no encontrado'}, status=status.HTTP_404_NOT_FOUND)
+
+
+@csrf_exempt
+def registrar_compra_view(request):
+    """Registra una compra de productos (ingreso de stock).
+    Espera JSON con los datos del maestro y los detalles:
+    {
+        "proveedor": "Proveedor X",
+        "total": 100.00,
+        "estado": "Registrado",
+        "detalles": [
+            {"producto": 1, "cantidad": 10, "precio_costo": 5.00},
+            ...
+        ]
+    }
+    """
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'Método no permitido'}, status=405)
+    try:
+        data = json.loads(request.body)
+        serializer = MaestroCompraSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return JsonResponse({'success': True, 'message': 'Compra registrada correctamente.'}, status=201)
+        else:
+            return JsonResponse({'success': False, 'error': 'Datos inválidos', 'details': serializer.errors}, status=400)
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return JsonResponse({'success': False, 'error': 'Error al registrar la compra', 'detail': str(e)}, status=500)

@@ -415,3 +415,18 @@ def registrar_compra_view(request):
         import traceback
         traceback.print_exc()
         return JsonResponse({'success': False, 'error': 'Error al registrar la compra', 'detail': str(e)}, status=500)
+
+from .models import MaestroCompra, DetalleCompra
+from .serializers import MaestroCompraSerializer
+from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
+from rest_framework.parsers import JSONParser
+from rest_framework import status
+
+@csrf_exempt
+def listar_compras_view(request):
+    if request.method == 'GET':
+        compras = MaestroCompra.objects.all().order_by('-fecha_registro')
+        serializer = MaestroCompraSerializer(compras, many=True)
+        return JsonResponse(serializer.data, safe=False, status=200)
+    return JsonResponse({'success': False, 'error': 'Método no permitido'}, status=405)
